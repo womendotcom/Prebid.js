@@ -23,10 +23,9 @@ var _eventCount = 0;
 var _enableDistribution = false;
 var _trackerSend = null;
 var _sampled = true;
-var _wdc_options = { bid_request:false,bid_timeout:false,bid_response:false,bid_won:false,bid_timing:false,bid_rollup:false };
+var _wdc_options = { bid_request:false,bid_timeout:false,bid_response:false,bid_won:false,bid_timing:false,bid_rollup:false,rollup_log:false,experiment: "" };
 var _wdc_auction_counter = 0;
 var _wdc_bid_history = {};
-//var _wdc_rollup_timer_enabled = false;
 
 /**
  * This will enable sending data to google analytics. Only call once, or duplicate data will be sent!
@@ -223,7 +222,6 @@ function sendBidRequestToGa(bid) {
 
 function sendBidResponseToGa(bid) {
   if (bid && bid.bidderCode) {
-    WDC.log.debug("THE BIDDER OBJ IS",bid);
     var cpmCents = convertToCents(bid.cpm);
     var bidder = bid.bidderCode;
     if (_wdc_options.bid_response) {
@@ -255,28 +253,7 @@ function sendBidResponseToGa(bid) {
     if(_wdc_options.bid_rollup) {
       if(!(bid.adUnitCode in _wdc_bid_history) || _wdc_bid_history[bid.adUnitCode]<bid.cpm) {
          _wdc_bid_history[bid.adUnitCode] = bid.cpm;
-         WDC.log.debug("LOGGING BID ",bid,_wdc_bid_history);
       }
-//      if(!_wdc_rollup_timer_enabled) {
-//         _wdc_rollup_timer_enabled = true;
-//         window.setTimeout(function() { 
-//            var sum = 0;
-//            //for(var prop in _wdc_bid_history[_wdc_auction_counter]) {
-//            for(var prop in _wdc_bid_history) {
-//              if(_wdc_bid_history.hasOwnProperty(prop) && prop.match(/gpt-ad/) != null) sum += _wdc_bid_history[prop];
-//            }
-//            _wdc_auction_counter++;
-//            WDC.log.debug("SENDING BID HISTORY",_wdc_bid_history,sum,_wdc_auction_counter); 
-//            _wdc_bid_history = {};
-//            _analyticsQueue.push(function () {
-//              _eventCount++;
-//              window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID", 'Bid Round Total', _wdc_auction_counter, convertToCents(sum), _disableInteraction);
-//        
-//            });
-//            _wdc_rollup_timer_enabled = false;
-//            checkAnalytics();
-//         },800);
-//      }
     }
   }
   // check the queue
@@ -296,7 +273,6 @@ function sendBidTimeouts(timedOutBidders) {
 }
 
 function sendBidWonToGa(bid) {
-  WDC.log.debug("BID HISTORY IS",_wdc_bid_history);
   if(_wdc_options.bid_won) {
     var cpmCents = convertToCents(bid.cpm);
     _analyticsQueue.push(function () {
@@ -323,10 +299,44 @@ function sendRollupMetricsToGa() {
     _wdc_bid_history = {};
     _analyticsQueue.push(function () {
       _eventCount++;
-      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID", 'Bid Round Total', _wdc_auction_counter, convertToCents(sum), _disableInteraction);
+      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID"+_wdc_options.experiment, 'Bid Round Total', _wdc_auction_counter, convertToCents(sum), _disableInteraction);
     });
     checkAnalytics();
   }
+  if(_wdc_options.rollup_log) {
+    (function() {
+      var responses = pbjs.getBidResponses();
+      var winners = pbjs.getAllWinningBids();
+      var output = [];
+      Object.keys(responses).forEach(function(adUnitCode) {
+        var response = responses[adUnitCode];
+        response.bids.forEach(function(bid) {
+          output.push({
+            bid: bid,
+            adunit: adUnitCode,
+            adId: bid.adId,
+            bidder: bid.bidder,
+            time: bid.timeToRespond,
+            cpm: bid.cpm,
+            msg: bid.statusMessage,
+            rendered: !!winners.find(function(winner) {
+              return winner.adId==bid.adId;
+            })
+          });
+        });
+      });
+      if (output.length) {
+        if (console.table) {
+          console.table(output);
+        } else {
+          WDC.log.debug("AUCTION SUMMARY",output);
+        }
+      } else {
+        WDC.log.warn('AUCTION HAD NO RESPONSES');
+      }
+    })();
+  }
+
 }
 
 adaptermanager.registerAnalyticsAdapter({
