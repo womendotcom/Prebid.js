@@ -23,7 +23,7 @@ var _eventCount = 0;
 var _enableDistribution = false;
 var _trackerSend = null;
 var _sampled = true;
-var _wdc_options = { bid_request:false,bid_timeout:false,bid_response:false,bid_won:false,bid_timing:false,bid_rollup:false,rollup_log:false,experiment: "" };
+var _wdc_options = { bid_request:false,bid_timeout:false,bid_response:false,bid_won:false,bid_timing:false,bid_rollup:false,bid_experiment: "" };
 var _wdc_auction_counter = 0;
 var _wdc_bid_history = {};
 
@@ -299,44 +299,10 @@ function sendRollupMetricsToGa() {
     _wdc_bid_history = {};
     _analyticsQueue.push(function () {
       _eventCount++;
-      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID", 'Bid Round Total' + (_wdc_options.experiment ? " " + _wdc_options.experiment : ""), _wdc_auction_counter, convertToCents(sum), _disableInteraction);
+      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID", 'Bid Round Total' + (_wdc_options.bid_experiment ? " " + _wdc_options.bid_experiment : ""), _wdc_auction_counter, convertToCents(sum), _disableInteraction);
     });
     checkAnalytics();
   }
-  if(_wdc_options.rollup_log) {
-    (function() {
-      var responses = pbjs.getBidResponses();
-      var winners = pbjs.getAllWinningBids();
-      var output = [];
-      Object.keys(responses).forEach(function(adUnitCode) {
-        var response = responses[adUnitCode];
-        response.bids.forEach(function(bid) {
-          output.push({
-            bid: bid,
-            adunit: adUnitCode,
-            adId: bid.adId,
-            bidder: bid.bidder,
-            time: bid.timeToRespond,
-            cpm: bid.cpm,
-            msg: bid.statusMessage,
-            rendered: !!winners.find(function(winner) {
-              return winner.adId==bid.adId;
-            })
-          });
-        });
-      });
-      if (output.length) {
-        if (console.table) {
-          console.table(output);
-        } else {
-          WDC.log.debug("AUCTION SUMMARY",output);
-        }
-      } else {
-        WDC.log.warn('AUCTION HAD NO RESPONSES');
-      }
-    })();
-  }
-
 }
 
 adaptermanager.registerAnalyticsAdapter({
