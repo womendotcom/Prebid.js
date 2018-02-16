@@ -299,7 +299,7 @@ function sendRollupMetricsToGa() {
     _wdc_bid_history = {};
     _analyticsQueue.push(function () {
       _eventCount++;
-      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID"+_wdc_options.experiment, 'Bid Round Total', _wdc_auction_counter, convertToCents(sum), _disableInteraction);
+      window[_gaGlobal](_trackerSend, 'event', "WDC_PREBID", 'Bid Round Total' + (_wdc_options.experiment ? " " + _wdc_options.experiment : ""), _wdc_auction_counter, convertToCents(sum), _disableInteraction);
     });
     checkAnalytics();
   }
