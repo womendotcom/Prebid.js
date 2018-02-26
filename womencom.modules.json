@@ -3,9 +3,8 @@
   "rubiconBidAdapter",
   "sovrnBidAdapter",
   "aolBidAdapter",
-  "appnexusAstBidAdapter",
+  "appnexusBidAdapter",
   "audienceNetworkBidAdapter",
-  "indexExchangeBidAdapter",
   "wdcGoogleAnalyticsAdapter"
 ]
 
