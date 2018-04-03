@@ -6,7 +6,6 @@
   "appnexusAstBidAdapter",
   "appnexusBidAdapter",
   "audienceNetworkBidAdapter",
-  "indexExchangeBidAdapter",
-  "wdcGoogleAnalyticsAdapter"
+  "indexExchangeBidAdapter"
 ]
 
