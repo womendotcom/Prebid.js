@@ -1,10 +1,7 @@
 [
-  "openxBidAdapter",
   "rubiconBidAdapter",
   "sovrnBidAdapter",
-  "aolBidAdapter",
   "appnexusBidAdapter",
-  "audienceNetworkBidAdapter",
-  "wdcGoogleAnalyticsAdapter"
+  "ixBidAdapter"
 ]
 
