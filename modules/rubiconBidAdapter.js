@@ -12,7 +12,7 @@ function isSecure() {
 // use protocol relative urls for http or https
 const FASTLANE_ENDPOINT = '//fastlane.rubiconproject.com/a/api/fastlane.json';
 const VIDEO_ENDPOINT = '//fastlane-adv.rubiconproject.com/v1/auction/video';
-const SYNC_ENDPOINT = 'https://tap-secure.rubiconproject.com/partner/scripts/rubicon/emily.html?rtb_ext=1';
+const SYNC_ENDPOINT = 'https://eus.rubiconproject.com/usync.html';
 
 const TIMEOUT_BUFFER = 500;
 
@@ -117,16 +117,16 @@ export const spec = {
       if (spec.hasVideoMediaType(bidRequest)) {
         let params = bidRequest.params;
         let size = parseSizes(bidRequest);
-        let page_rf = !params.referrer ? utils.getTopWindowUrl() : params.referrer;
 
         let data = {
-          page_url: params.secure ? page_rf.replace(/^http:/i, 'https:') : page_rf,
+          page_url: !params.referrer ? utils.getTopWindowUrl() : params.referrer,
           resolution: _getScreenResolution(),
           account_id: params.accountId,
           integration: INTEGRATION,
           timeout: bidderRequest.timeout - (Date.now() - bidderRequest.auctionStart + TIMEOUT_BUFFER),
           stash_creatives: true,
           ae_pass_through_parameters: params.video.aeParams,
+          rp_secure: params.secure !== false,
           slots: []
         };
 
@@ -134,7 +134,7 @@ export const spec = {
         let slotData = {
           site_id: params.siteId,
           zone_id: params.zoneId,
-          position: params.position || 'btf',
+          position: params.position === 'atf' || params.position === 'btf' ? params.position : 'unknown',
           floor: parseFloat(params.floor) > 0.01 ? params.floor : 0.01,
           element_id: bidRequest.adUnitCode,
           name: bidRequest.adUnitCode,
