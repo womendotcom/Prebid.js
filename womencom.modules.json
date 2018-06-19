@@ -2,6 +2,9 @@
   "rubiconBidAdapter",
   "sovrnBidAdapter",
   "appnexusBidAdapter",
-  "ixBidAdapter"
+  "ixBidAdapter",
+  "openxBidAdapter",
+  "aolBidAdapter",
+  "audienceNetworkBidAdapter"
 ]
 
