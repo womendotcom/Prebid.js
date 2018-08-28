@@ -71,6 +71,7 @@ var sizeMap = {
   199: '640x200',
   213: '1030x590',
   214: '980x360',
+  229: '320x180',
   232: '580x400',
   257: '400x600'
 };
@@ -476,6 +477,19 @@ export const spec = {
         url: SYNC_ENDPOINT + params
       };
     }
+  },
+  /**
+   * Covert bid param types for S2S
+   * @param {Object} params bid params
+   * @param {Boolean} isOpenRtb boolean to check openrtb2 protocol
+   * @return {Object} params bid params
+   */
+  transformBidParams: function(params, isOpenRtb) {
+    return utils.convertTypes({
+      'accountId': 'number',
+      'siteId': 'number',
+      'zoneId': 'number'
+    }, params);
   }
 };
 
@@ -506,13 +520,13 @@ function _getDigiTrustQueryParams() {
  * @returns {string}
  */
 function _getPageUrl(bidRequest) {
-  let page_url = config.getConfig('pageUrl');
+  let pageUrl = config.getConfig('pageUrl');
   if (bidRequest.params.referrer) {
-    page_url = bidRequest.params.referrer;
-  } else if (!page_url) {
-    page_url = utils.getTopWindowUrl();
+    pageUrl = bidRequest.params.referrer;
+  } else if (!pageUrl) {
+    pageUrl = utils.getTopWindowUrl();
   }
-  return bidRequest.params.secure ? page_url.replace(/^http:/i, 'https:') : page_url;
+  return bidRequest.params.secure ? pageUrl.replace(/^http:/i, 'https:') : pageUrl;
 }
 
 function _renderCreative(script, impId) {
@@ -531,13 +545,13 @@ function parseSizes(bid) {
   let params = bid.params;
   if (hasVideoMediaType(bid)) {
     let size = [];
-    if (typeof utils.deepAccess(bid, 'mediaTypes.video.playerSize') !== 'undefined') {
-      size = bid.mediaTypes.video.playerSize;
-    } else if (params.video && params.video.playerWidth && params.video.playerHeight) {
+    if (params.video && params.video.playerWidth && params.video.playerHeight) {
       size = [
         params.video.playerWidth,
         params.video.playerHeight
       ];
+    } else if (Array.isArray(utils.deepAccess(bid, 'mediaTypes.video.playerSize')) && bid.mediaTypes.video.playerSize.length === 1) {
+      size = bid.mediaTypes.video.playerSize[0];
     } else if (Array.isArray(bid.sizes) && bid.sizes.length > 0 && Array.isArray(bid.sizes[0]) && bid.sizes[0].length > 1) {
       size = bid.sizes[0];
     }
