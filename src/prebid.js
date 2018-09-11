@@ -253,19 +253,16 @@ $$PREBID_GLOBAL$$.renderAd = function (doc, id) {
         } else if ((doc === document && !utils.inIframe()) || mediaType === 'video') {
           const message = `Error trying to write ad. Ad render call ad id ${id} was prevented from writing to the main document.`;
           emitAdRenderFail(PREVENT_WRITING_ON_MAIN_DOCUMENT, message, bid);
-        } else if (ad) {
-          doc.write(ad);
-          doc.close();
-          setRenderSize(doc, width, height);
-          utils.callBurl(bid);
-        } else if (adUrl) {
+        } else if (ad || adUrl) {
+//          doc.write(ad);
+//          doc.close();
           const iframe = utils.createInvisibleIframe();
+          iframe.sandbox = "allow-forms allow-presentation allow-scripts"
           iframe.height = height;
           iframe.width = width;
           iframe.style.display = 'inline';
           iframe.style.overflow = 'hidden';
-          iframe.src = adUrl;
-
+          iframe.src = ad ? "data:text/html;base64," + btoa("<html><head></head><body>"+o+"</body></html>") : adUrl; 
           utils.insertElement(iframe, doc, 'body');
           setRenderSize(doc, width, height);
           utils.callBurl(bid);
