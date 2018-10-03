@@ -257,12 +257,21 @@ $$PREBID_GLOBAL$$.renderAd = function (doc, id) {
 //          doc.write(ad);
 //          doc.close();
           const iframe = utils.createInvisibleIframe();
-          iframe.sandbox = "allow-forms allow-presentation allow-scripts"
+          iframe.sandbox = "allow-forms allow-presentation allow-scripts allow-same-origin"
           iframe.height = height;
           iframe.width = width;
           iframe.style.display = 'inline';
           iframe.style.overflow = 'hidden';
-          iframe.src = ad ? "data:text/html;base64," + btoa("<html><head></head><body>"+o+"</body></html>") : adUrl; 
+          WDC.log.debug("Trying to rewrite url")
+          iframe.src = ad ? "data:text/html;base64," + btoa("<html><head></head><body>" +
+//          		"<scr"+"ipt>" +
+//          		"console.log('DOCUMENT!!!!',document);" +
+//          		"console.log('LOCATION!!!!',document.location);console.log('WINDOW!!!!',window);" +
+//          		"console.log('DOCUMENT!!!!',document,document.location,window,window.parent,window.top);" +
+//          		"window.top.document.location.replace('https://www.google.com')" +
+//          		"window.parent.document.location.replace('https://www.google.com')" +
+//          		"</scr"+"ipt>"+
+             ad+"</body></html>") : adUrl; 
           utils.insertElement(iframe, doc, 'body');
           setRenderSize(doc, width, height);
           utils.callBurl(bid);
