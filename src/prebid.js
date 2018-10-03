@@ -262,11 +262,11 @@ $$PREBID_GLOBAL$$.renderAd = function (doc, id) {
           iframe.width = width;
           iframe.style.display = 'inline';
           iframe.style.overflow = 'hidden';
-          WDC.log.debug("Trying to rewrite url")
           iframe.src = ad ? "data:text/html;base64," + btoa("<html><head></head><body>" +
 //          		"<scr"+"ipt>" +
 //          		"console.log('DOCUMENT!!!!',document);" +
-//          		"console.log('LOCATION!!!!',document.location);console.log('WINDOW!!!!',window);" +
+//          		"console.log('LOCATION!!!!',document.location);" +
+//          		"console.log('WINDOW!!!!',window);" +
 //          		"console.log('DOCUMENT!!!!',document,document.location,window,window.parent,window.top);" +
 //          		"window.top.document.location.replace('https://www.google.com')" +
 //          		"window.parent.document.location.replace('https://www.google.com')" +
