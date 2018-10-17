@@ -15,6 +15,7 @@ import * as ajaxLib from 'src/ajax';
 import * as auctionModule from 'src/auction';
 import { newBidder, registerBidder } from 'src/adapters/bidderFactory';
 import * as targetingModule from 'src/targeting';
+import find from 'core-js/library/fn/array/find';
 
 var assert = require('chai').assert;
 var expect = require('chai').expect;
@@ -25,7 +26,7 @@ var prebid = require('src/prebid');
 var utils = require('src/utils');
 // var bidmanager = require('src/bidmanager');
 var bidfactory = require('src/bidfactory');
-var adloader = require('src/adloader');
+var adloader = require('test/mocks/adloaderStub');
 var adaptermanager = require('src/adaptermanager');
 var events = require('src/events');
 var adserver = require('src/adserver');
@@ -1590,8 +1591,8 @@ describe('Unit: Prebid Module', function () {
   describe('emit', function () {
     it('should be able to emit event without arguments', function () {
       var spyEventsEmit = sinon.spy(events, 'emit');
-      events.emit(CONSTANTS.EVENTS.AUCTION_END);
-      assert.ok(spyEventsEmit.calledWith('auctionEnd'));
+      events.emit(CONSTANTS.EVENTS.REQUEST_BIDS);
+      assert.ok(spyEventsEmit.calledWith('requestBids'));
       events.emit.restore();
     });
   });
@@ -1632,14 +1633,12 @@ describe('Unit: Prebid Module', function () {
 
   describe('loadScript', function () {
     it('should call adloader.loadScript', function () {
-      const loadScriptSpy = sinon.spy(adloader, 'loadScript');
       const tagSrc = '';
       const callback = Function;
       const useCache = false;
 
       $$PREBID_GLOBAL$$.loadScript(tagSrc, callback, useCache);
-      assert.ok(loadScriptSpy.calledWith(tagSrc, callback, useCache), 'called adloader.loadScript');
-      adloader.loadScript.restore();
+      assert.ok(adloader.loadScriptStub.calledWith(tagSrc, callback, useCache), 'called adloader.loadScript');
     });
   });
 
@@ -1849,9 +1848,8 @@ describe('Unit: Prebid Module', function () {
       // mark the bid and verify the state has changed to RENDERED
       const winningBid = targeting.getWinningBids(adUnitCode)[0];
       $$PREBID_GLOBAL$$.markWinningBidAsUsed({ adUnitCode, adId: winningBid.adId });
-      const markedBid = $$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode)
-        .bids
-        .find(bid => bid.adId === winningBid.adId);
+      const markedBid = find($$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode).bids,
+        bid => bid.adId === winningBid.adId);
 
       expect(markedBid.status).to.equal(RENDERED);
       resetAuction();
@@ -1864,9 +1862,8 @@ describe('Unit: Prebid Module', function () {
 
       const winningBid = targeting.getWinningBids(adUnitCode)[0];
       $$PREBID_GLOBAL$$.markWinningBidAsUsed({ adUnitCode, adId: 'miss' });
-      const markedBid = $$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode)
-        .bids
-        .find(bid => bid.adId === winningBid.adId);
+      const markedBid = find($$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode).bids,
+        bid => bid.adId === winningBid.adId);
 
       expect(markedBid.status).to.not.equal(RENDERED);
       resetAuction();
@@ -1881,9 +1878,8 @@ describe('Unit: Prebid Module', function () {
       // mark the bid and verify the state has changed to RENDERED
       const winningBid = targeting.getWinningBids(adUnitCode)[0];
       $$PREBID_GLOBAL$$.markWinningBidAsUsed({ adUnitCode });
-      const markedBid = $$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode)
-        .bids
-        .find(bid => bid.adId === winningBid.adId);
+      const markedBid = find($$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode).bids,
+        bid => bid.adId === winningBid.adId);
 
       expect(markedBid.status).to.equal(RENDERED);
       resetAuction();
@@ -1898,9 +1894,8 @@ describe('Unit: Prebid Module', function () {
       // mark the bid and verify the state has changed to RENDERED
       const winningBid = targeting.getWinningBids(adUnitCode)[0];
       $$PREBID_GLOBAL$$.markWinningBidAsUsed({ adId: winningBid.adId });
-      const markedBid = $$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode)
-        .bids
-        .find(bid => bid.adId === winningBid.adId);
+      const markedBid = find($$PREBID_GLOBAL$$.getBidResponsesForAdUnitCode(adUnitCode).bids,
+        bid => bid.adId === winningBid.adId);
 
       expect(markedBid.status).to.equal(RENDERED);
       resetAuction();
