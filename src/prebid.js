@@ -249,7 +249,7 @@ $$PREBID_GLOBAL$$.renderAd = function (doc, id) {
         const creativeComment = document.createComment(`Creative ${bid.creativeId} served by ${bid.bidder} Prebid.js Header Bidding`);
         utils.insertElement(creativeComment, doc, 'body');
 
-        if (isRendererRequired(renderer)) {
+        if (false && isRendererRequired(renderer)) {
           executeRenderer(renderer, bid);
         } else if ((doc === document && !utils.inIframe()) || mediaType === 'video') {
           const message = `Error trying to write ad. Ad render call ad id ${id} was prevented from writing to the main document.`;
