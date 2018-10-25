@@ -249,21 +249,36 @@ $$PREBID_GLOBAL$$.renderAd = function (doc, id) {
         const creativeComment = document.createComment(`Creative ${bid.creativeId} served by ${bid.bidder} Prebid.js Header Bidding`);
         utils.insertElement(creativeComment, doc, 'body');
 
-        if (false && isRendererRequired(renderer)) {
+        if ((bid.bidder == "audienceNetwork" || false) && isRendererRequired(renderer)) {
           executeRenderer(renderer, bid);
         } else if ((doc === document && !utils.inIframe()) || mediaType === 'video') {
           const message = `Error trying to write ad. Ad render call ad id ${id} was prevented from writing to the main document.`;
           emitAdRenderFail(PREVENT_WRITING_ON_MAIN_DOCUMENT, message, bid);
-        } else if (ad || adUrl) {
-//          doc.write(ad);
-//          doc.close();
+        } else if(bid.bidder == "audienceNetwork" && (ad || adUrl)) {
+        	if(ad) { // XXX THIS IS THE OLD PREBID CODE
+        			doc.write(ad);
+        			doc.close();
+        			setRenderSize(doc, width, height);
+        			utils.callBurl(bid);
+        	} else {
+        			const iframe = utils.createInvisibleIframe();
+        			iframe.height = height;
+        			iframe.width = width;
+        			iframe.style.display = 'inline';
+        			iframe.style.overflow = 'hidden';
+        			iframe.src = adUrl;
+        			utils.insertElement(iframe, doc, 'body');
+        			setRenderSize(doc, width, height);
+        			utils.callBurl(bid);
+        	}
+        } else if (ad || adUrl) { // XXX WOMEN.COM SPECIFIC CODE
           const iframe = utils.createInvisibleIframe();
-          iframe.sandbox = "allow-forms allow-presentation allow-scripts allow-same-origin"
+          iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups"
           iframe.height = height;
           iframe.width = width;
           iframe.style.display = 'inline';
           iframe.style.overflow = 'hidden';
-          iframe.src = ad ? "data:text/html;base64," + btoa("<html><head></head><body>" +
+          iframe.src = ad ? "data:text/html;base64," + btoa("<html><head><base target=\"_blank\"></head><body>" +
 //          		"<scr"+"ipt>" +
 //          		"console.log('DOCUMENT!!!!',document);" +
 //          		"console.log('LOCATION!!!!',document.location);" +
